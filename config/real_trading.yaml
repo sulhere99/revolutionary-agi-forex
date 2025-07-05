@@ -1,0 +1,243 @@
+# Real Trading Configuration for Revolutionary AGI Forex Trading System
+# ===================================================
+
+# Import base configuration
+imports:
+  - config.yaml
+
+# System Information
+system:
+  name: "AGI Forex Trading System - REAL TRADING"
+  environment: "production"
+  debug: false
+  log_level: "INFO"
+
+# Data Collection Configuration
+data_collection:
+  # Market data providers
+  providers:
+    oanda:
+      enabled: true
+      environment: "live"  # Using live environment
+      
+    fxcm:
+      enabled: false
+      server: "real"  # Using real server
+      
+  # Currency pairs to monitor (focused selection for real trading)
+  currency_pairs:
+    major:
+      - "EURUSD"
+      - "GBPUSD"
+      - "USDJPY"
+    
+    minor:
+      - "EURGBP"
+      - "EURJPY"
+    
+    exotic: []  # No exotic pairs in real trading
+  
+  # Timeframes to collect (focused selection for real trading)
+  timeframes:
+    - "M5"   # 5 minutes
+    - "M15"  # 15 minutes
+    - "H1"   # 1 hour
+    - "H4"   # 4 hours
+    - "D1"   # Daily
+    
+  # Market data configuration
+  market_data:
+    enabled: true
+    storage:
+      type: "database"  # Store in database
+      format: "ohlcv"   # Open, High, Low, Close, Volume format
+    update_interval: 60  # Update every 60 seconds
+    max_history:
+      M5: 5000    # Store 5000 5-minute candles
+      M15: 5000   # Store 5000 15-minute candles
+      H1: 5000    # Store 5000 1-hour candles
+      H4: 2000    # Store 2000 4-hour candles
+      D1: 1000    # Store 1000 daily candles
+
+# Risk Management Configuration (more conservative for real trading)
+risk_management:
+  # Position sizing
+  position_sizing:
+    method: "percentage"  # Using simple percentage method for real trading
+    base_risk_per_trade: 0.005  # 0.5% of account (very conservative)
+    max_risk_per_trade: 0.01   # 1% maximum (very conservative)
+    
+  # Portfolio limits
+  portfolio:
+    max_open_positions: 5  # Reduced for real trading
+    max_correlated_positions: 2  # Reduced for real trading
+    max_exposure_per_currency: 0.15  # 15% (reduced)
+    max_total_exposure: 0.5  # 50% (reduced)
+    
+  # Drawdown protection
+  drawdown:
+    max_daily_drawdown: 0.02    # 2% (reduced)
+    max_weekly_drawdown: 0.05   # 5% (reduced)
+    max_monthly_drawdown: 0.08  # 8% (reduced)
+    stop_trading_threshold: 0.10 # 10% (reduced)
+    
+  # Stop loss settings
+  stop_loss:
+    method: "atr_based"
+    atr_multiplier: 1.5  # Reduced from 2.0
+    min_stop_loss_pips: 15
+    max_stop_loss_pips: 50  # Reduced from 100
+    trailing_stop: true
+    
+  # Take profit settings
+  take_profit:
+    method: "risk_reward_ratio"
+    risk_reward_ratio: 2.0  # Reduced from 2.5
+    partial_profit_levels: [0.5, 0.75]
+
+# AGI Brain Configuration (more conservative for real trading)
+agi_brain:
+  # Signal generation
+  signal_generation:
+    min_confidence: 0.75  # Increased from 0.6
+    max_signals_per_hour: 2  # Reduced from 5
+    signal_expiry_minutes: 20  # Reduced from 30
+    risk_reward_min: 2.0  # Increased from 1.5
+    max_spread_pips: 2  # Reduced from 3
+
+# Telegram Bot Configuration
+telegram:
+  bot_token: "${TELEGRAM_BOT_TOKEN}"
+  webhook_url: "${TELEGRAM_WEBHOOK_URL}"
+  signals_chat_id: "${TELEGRAM_SIGNALS_CHAT_ID}"
+  news_chat_id: "${TELEGRAM_NEWS_CHAT_ID}"
+  alerts_chat_id: "${TELEGRAM_ALERTS_CHAT_ID}"
+  admin_chat_id: "${TELEGRAM_ADMIN_CHAT_ID}"
+  polling_interval: 5
+  webhook_mode: false
+  allowed_users: []  # Empty list means all users are allowed
+  admin_users: ["${TELEGRAM_ADMIN_CHAT_ID}"]
+  commands:
+    enabled: true
+    prefix: "/"
+  notifications:
+    signals: true
+    news: true
+    alerts: true
+    performance: true
+    system_status: true
+
+# API Configuration
+api:
+  enabled: true
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
+  workers: 4
+  timeout: 60
+  cors:
+    enabled: true
+    allow_origins: ["*"]
+    allow_methods: ["*"]
+    allow_headers: ["*"]
+  security:
+    api_keys:
+      - "${API_KEY_1}"
+      - "${API_KEY_2}"
+    jwt:
+      secret: "${JWT_SECRET}"
+      algorithm: "HS256"
+      expires_minutes: 60
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+  endpoints:
+    revolutionary_status: "/api/v2/revolutionary-status"
+    quantum_performance: "/api/v2/quantum-performance"
+    swarm_intelligence: "/api/v2/swarm-intelligence"
+    computer_vision: "/api/v2/computer-vision-analysis"
+    blockchain_verification: "/api/v2/blockchain-verification"
+    neuro_economic: "/api/v2/neuro-economic-pulse"
+    signals: "/api/v2/signals"
+    performance: "/api/v2/performance"
+    account: "/api/v2/account"
+    trades: "/api/v2/trades"
+    docs: "/api/v2/docs"
+
+# Monitoring and Alerting Configuration
+monitoring:
+  # Alerting
+  alerting:
+    email:
+      enabled: true
+      smtp_server: "smtp.gmail.com"
+      smtp_port: 587
+      username: "${EMAIL_USERNAME}"
+      password: "${EMAIL_PASSWORD}"
+      from_address: "${EMAIL_USERNAME}"
+      to_addresses: ["${EMAIL_USERNAME}"]
+      use_tls: true
+    
+    telegram:
+      enabled: true
+      chat_id: "${TELEGRAM_ALERTS_CHAT_ID}"
+
+# Database Configuration
+database:
+  # Primary database for trading data
+  primary:
+    type: "sqlite"
+    host: "localhost"  # Required field even for SQLite
+    port: 0  # Required field even for SQLite
+    path: "/workspace/revolutionary-agi-forex/data/revolutionary_agi_forex.db"
+    name: "revolutionary_agi_forex"  # Required field
+    username: "sqlite_user"  # Required field even for SQLite
+    password: "sqlite_password"  # Required field even for SQLite
+    echo: false
+    pool_size: 5
+    max_overflow: 10
+  
+  # Time-series database for market data
+  timeseries:
+    type: "influxdb"
+    host: "localhost"
+    port: 8086
+    database: "market_data"
+    username: "influx_user"
+    password: "${INFLUX_PASSWORD}"
+    retention_policy: "30d"
+    enabled: false  # Disabled for now
+
+# Redis Configuration
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: "${REDIS_PASSWORD}"
+  max_connections: 100
+  socket_timeout: 30
+  socket_connect_timeout: 30
+  ssl: false
+  connection_pool: 10
+  timeout: 5
+  retry_on_timeout: true
+  health_check_interval: 30
+
+# Development and Testing Configuration
+development:
+  # Testing
+  testing:
+    unit_tests: false
+    integration_tests: false
+    performance_tests: false
+    backtesting: false
+    
+  # Debugging
+  debugging:
+    profiling: false
+    memory_monitoring: true
+    performance_monitoring: true
+    
+  # Mock data
+  mock_data:
+    enabled: false  # No mock data in real trading

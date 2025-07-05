@@ -1,0 +1,38 @@
+nohup: ignoring input
+INFO:     Started server process [17426]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:12000 (Press CTRL+C to quit)
+
+🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀
+
+    🌐 REVOLUTIONARY AGI FOREX TRADING SYSTEM - SIMPLE WEB DEMO 🌐
+
+🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀
+
+🎯 Simple Interactive Demo of 5 Revolutionary Technologies:
+
+1. 🧬 Quantum Portfolio Optimization
+2. 👁️ Computer Vision Chart Analysis
+3. 🐝 Swarm Intelligence Decision Making
+4. 🔗 Blockchain Signal Verification
+5. 🧠 Neuro-Economic Sentiment Engine
+
+🌐 Access the demo at: http://localhost:12000
+📱 Mobile-friendly responsive design
+🎮 Interactive demo controls
+📊 Real-time progress monitoring
+🎉 Beautiful results visualization
+
+🚀 Starting simple web server...
+
+INFO:     127.0.0.1:53840 - "GET /api/demo/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60364 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60366 - "POST /api/demo/start HTTP/1.1" 200 OK
+/workspace/forex_agi_system/simple_web_demo.py:64: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  dates = pd.date_range(start=datetime.now() - timedelta(days=100), periods=100, freq='H')
+INFO:     127.0.0.1:37274 - "GET /api/demo/status HTTP/1.1" 200 OK
+✅ Simple demo completed successfully!
+INFO:     127.0.0.1:42466 - "GET /api/demo/results HTTP/1.1" 200 OK
+INFO:     10.2.46.10:34556 - "GET / HTTP/1.1" 200 OK
+INFO:     10.2.97.11:38608 - "GET / HTTP/1.1" 200 OK

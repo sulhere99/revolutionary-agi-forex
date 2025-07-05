@@ -1,0 +1,11 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+  File "/workspace/forex_agi_system/web_demo.py", line 29, in <module>
+    from demo_revolutionary import (
+  File "/workspace/forex_agi_system/demo_revolutionary.py", line 36, in <module>
+    from core.neuro_economic_engine import NeuroEconomicEngine
+  File "/workspace/forex_agi_system/core/neuro_economic_engine.py", line 39, in <module>
+    import satellite_image_processing  # Hypothetical satellite processing library
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'satellite_image_processing'

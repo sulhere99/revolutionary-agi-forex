@@ -1,0 +1,636 @@
+# AGI Forex Trading System Configuration
+# =====================================
+
+# System Information
+system:
+  name: "AGI Forex Trading System"
+  version: "2.0.0"
+  environment: "production"  # development, staging, production
+  debug: false
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+# Database Configuration
+database:
+  # Primary database for trading data
+  primary:
+    type: "postgresql"
+    host: "localhost"
+    port: 5432
+    name: "forex_agi_db"
+    username: "forex_user"
+    password: "${DB_PASSWORD}"
+    pool_size: 20
+    max_overflow: 30
+    echo: false
+  
+  # Time-series database for market data
+  timeseries:
+    type: "influxdb"
+    host: "localhost"
+    port: 8086
+    database: "market_data"
+    username: "influx_user"
+    password: "${INFLUX_PASSWORD}"
+    retention_policy: "30d"
+
+# Redis Configuration
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: "${REDIS_PASSWORD}"
+  max_connections: 100
+  socket_timeout: 30
+  socket_connect_timeout: 30
+
+# AGI Brain Configuration
+agi_brain:
+  # Model parameters
+  models:
+    neural_ensemble:
+      input_size: 100
+      hidden_sizes: [256, 512, 1024, 512, 256]
+      output_size: 3
+      dropout_rate: 0.3
+      learning_rate: 0.001
+      batch_size: 64
+      epochs: 100
+    
+    reinforcement_learning:
+      state_size: 100
+      action_size: 3
+      algorithm: "PPO"  # PPO, A2C, SAC
+      learning_rate: 0.0003
+      gamma: 0.99
+      clip_range: 0.2
+      n_steps: 2048
+      batch_size: 64
+      n_epochs: 10
+    
+    xgboost:
+      n_estimators: 1000
+      learning_rate: 0.01
+      max_depth: 6
+      subsample: 0.8
+      colsample_bytree: 0.8
+      reg_alpha: 0.1
+      reg_lambda: 0.1
+    
+    lightgbm:
+      n_estimators: 500
+      learning_rate: 0.05
+      max_depth: 8
+      num_leaves: 31
+      subsample: 0.8
+      colsample_bytree: 0.8
+  
+  # Self-improvement parameters
+  self_improvement:
+    adaptation_threshold: 0.1
+    retraining_frequency: "daily"  # hourly, daily, weekly
+    performance_window: 100  # Number of trades to evaluate
+    min_trades_for_retraining: 50
+    hyperparameter_optimization: true
+    auto_feature_selection: true
+  
+  # Signal generation
+  signal_generation:
+    min_confidence: 0.6
+    max_signals_per_hour: 5
+    signal_expiry_minutes: 30
+    risk_reward_min: 1.5
+    max_spread_pips: 3
+
+# Data Collection Configuration
+data_collection:
+  # Market data providers
+  providers:
+    oanda:
+      enabled: true
+      api_key: "${OANDA_API_KEY}"
+      account_id: "${OANDA_ACCOUNT_ID}"
+      environment: "live"  # practice, live
+      base_url: "https://api-fxtrade.oanda.com"
+      timeout: 30
+      rate_limit: 100  # requests per minute
+    
+    fxcm:
+      enabled: false
+      api_key: "${FXCM_API_KEY}"
+      server: "demo"  # demo, real
+      timeout: 30
+    
+    alpha_vantage:
+      enabled: true
+      api_key: "${ALPHA_VANTAGE_API_KEY}"
+      timeout: 30
+      rate_limit: 5  # requests per minute
+    
+    yahoo_finance:
+      enabled: true
+      timeout: 30
+    
+    ccxt:
+      enabled: true
+      exchanges: ["binance", "kraken", "coinbase"]
+      sandbox: true
+  
+  # Currency pairs to monitor
+  currency_pairs:
+    major:
+      - "EURUSD"
+      - "GBPUSD"
+      - "USDJPY"
+      - "USDCHF"
+      - "AUDUSD"
+      - "USDCAD"
+      - "NZDUSD"
+    
+    minor:
+      - "EURGBP"
+      - "EURJPY"
+      - "EURCHF"
+      - "GBPJPY"
+      - "GBPCHF"
+      - "AUDJPY"
+    
+    exotic:
+      - "USDTRY"
+      - "USDZAR"
+      - "USDMXN"
+      - "USDSEK"
+      - "USDNOK"
+  
+  # Timeframes to collect
+  timeframes:
+    - "M1"   # 1 minute
+    - "M5"   # 5 minutes
+    - "M15"  # 15 minutes
+    - "H1"   # 1 hour
+    - "H4"   # 4 hours
+    - "D1"   # Daily
+  
+  # Data retention
+  retention:
+    tick_data: "7d"
+    minute_data: "30d"
+    hourly_data: "1y"
+    daily_data: "10y"
+
+# News and Sentiment Configuration
+news_sentiment:
+  # News sources
+  sources:
+    rss_feeds:
+      - "https://feeds.reuters.com/reuters/businessNews"
+      - "https://feeds.bloomberg.com/markets/news.rss"
+      - "https://feeds.finance.yahoo.com/rss/2.0/headline"
+      - "https://www.forexfactory.com/rss.php"
+      - "https://www.fxstreet.com/rss"
+    
+    twitter:
+      enabled: true
+      api_key: "${TWITTER_API_KEY}"
+      api_secret: "${TWITTER_API_SECRET}"
+      access_token: "${TWITTER_ACCESS_TOKEN}"
+      access_token_secret: "${TWITTER_ACCESS_TOKEN_SECRET}"
+      bearer_token: "${TWITTER_BEARER_TOKEN}"
+      keywords:
+        - "forex"
+        - "USD"
+        - "EUR"
+        - "GBP"
+        - "JPY"
+        - "central bank"
+        - "interest rates"
+        - "inflation"
+        - "GDP"
+        - "employment"
+      max_tweets: 100
+      language: "en"
+    
+    reddit:
+      enabled: true
+      client_id: "${REDDIT_CLIENT_ID}"
+      client_secret: "${REDDIT_CLIENT_SECRET}"
+      user_agent: "AGI-Forex-Bot"
+      subreddits:
+        - "forex"
+        - "investing"
+        - "economics"
+        - "financialindependence"
+  
+  # Sentiment analysis
+  sentiment_analysis:
+    model: "transformers"  # textblob, vader, transformers
+    model_name: "cardiffnlp/twitter-roberta-base-sentiment-latest"
+    confidence_threshold: 0.7
+    batch_size: 32
+  
+  # News filtering
+  filtering:
+    min_relevance_score: 0.3
+    max_age_hours: 24
+    languages: ["en"]
+    exclude_keywords:
+      - "advertisement"
+      - "sponsored"
+      - "promotion"
+
+# Economic Calendar Configuration
+economic_calendar:
+  providers:
+    forex_factory:
+      enabled: true
+      url: "https://www.forexfactory.com/calendar.php"
+      importance_filter: ["high", "medium"]
+    
+    investing_com:
+      enabled: true
+      url: "https://www.investing.com/economic-calendar/"
+      importance_filter: ["high"]
+    
+    fxstreet:
+      enabled: true
+      url: "https://www.fxstreet.com/economic-calendar"
+  
+  # Event filtering
+  filtering:
+    importance_levels: ["high", "medium"]
+    currencies: ["USD", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "NZD"]
+    event_types:
+      - "Interest Rate Decision"
+      - "GDP"
+      - "Inflation"
+      - "Employment"
+      - "Retail Sales"
+      - "Manufacturing PMI"
+      - "Services PMI"
+
+# Telegram Bot Configuration
+telegram:
+  bot_token: "${TELEGRAM_BOT_TOKEN}"
+  webhook_url: "${TELEGRAM_WEBHOOK_URL}"
+  
+  # Chat configurations
+  chats:
+    signals:
+      chat_id: "${TELEGRAM_SIGNALS_CHAT_ID}"
+      enabled: true
+    
+    news:
+      chat_id: "${TELEGRAM_NEWS_CHAT_ID}"
+      enabled: true
+    
+    alerts:
+      chat_id: "${TELEGRAM_ALERTS_CHAT_ID}"
+      enabled: true
+    
+    admin:
+      chat_id: "${TELEGRAM_ADMIN_CHAT_ID}"
+      enabled: true
+  
+  # Message settings
+  messages:
+    max_length: 4096
+    parse_mode: "Markdown"
+    disable_web_page_preview: true
+    
+  # Rate limiting
+  rate_limiting:
+    messages_per_second: 1
+    messages_per_minute: 20
+    burst_limit: 5
+  
+  # Features
+  features:
+    voice_messages: true
+    charts: true
+    interactive_keyboards: true
+    file_uploads: true
+    multi_language: true
+    
+  # Supported languages
+  languages:
+    - code: "en"
+      name: "English"
+      default: true
+    - code: "id"
+      name: "Bahasa Indonesia"
+    - code: "es"
+      name: "Español"
+    - code: "fr"
+      name: "Français"
+    - code: "de"
+      name: "Deutsch"
+    - code: "ja"
+      name: "日本語"
+    - code: "zh"
+      name: "中文"
+
+# N8N Workflow Configuration
+n8n:
+  base_url: "http://localhost:5678"
+  webhook_url: "${N8N_WEBHOOK_URL}"
+  api_key: "${N8N_API_KEY}"
+  
+  # Workflow settings
+  workflows:
+    market_data_collection:
+      enabled: true
+      schedule: "*/30 * * * * *"  # Every 30 seconds
+      timeout: 300
+    
+    signal_generation:
+      enabled: true
+      trigger: "webhook"
+      timeout: 120
+    
+    news_processing:
+      enabled: true
+      schedule: "0 */4 * * *"  # Every 4 hours
+      timeout: 600
+    
+    performance_tracking:
+      enabled: true
+      schedule: "0 0 * * *"  # Daily
+      timeout: 1800
+    
+    risk_monitoring:
+      enabled: true
+      schedule: "*/5 * * * *"  # Every 5 minutes
+      timeout: 60
+
+# Risk Management Configuration
+risk_management:
+  # Position sizing
+  position_sizing:
+    method: "percentage"  # fixed, percentage, kelly_criterion, volatility_adjusted
+    base_risk_per_trade: 0.01  # 1% of account (more conservative for real trading)
+    max_risk_per_trade: 0.02   # 2% maximum (more conservative for real trading)
+    kelly_fraction_cap: 0.15   # Maximum Kelly fraction (more conservative)
+    
+  # Portfolio limits
+  portfolio:
+    max_open_positions: 10
+    max_correlated_positions: 3
+    max_exposure_per_currency: 0.3  # 30%
+    max_total_exposure: 1.0  # 100%
+    
+  # Drawdown protection
+  drawdown:
+    max_daily_drawdown: 0.05    # 5%
+    max_weekly_drawdown: 0.10   # 10%
+    max_monthly_drawdown: 0.15  # 15%
+    stop_trading_threshold: 0.20 # 20%
+    
+  # Risk metrics
+  metrics:
+    var_confidence: 0.95
+    expected_shortfall_confidence: 0.95
+    lookback_period: 252  # Trading days
+    
+  # Stop loss settings
+  stop_loss:
+    method: "atr_based"  # fixed_pips, percentage, atr_based, volatility_adjusted
+    atr_multiplier: 2.0
+    min_stop_loss_pips: 10
+    max_stop_loss_pips: 100
+    trailing_stop: true
+    
+  # Take profit settings
+  take_profit:
+    method: "risk_reward_ratio"  # fixed_pips, percentage, risk_reward_ratio
+    risk_reward_ratio: 2.5
+    partial_profit_levels: [0.5, 0.75]  # Take 50% at 1.25R, 25% at 1.875R
+
+# Performance Monitoring Configuration
+performance:
+  # Metrics calculation
+  metrics:
+    calculation_frequency: "daily"
+    lookback_periods: [30, 90, 180, 365]  # Days
+    benchmark: "EURUSD_buy_and_hold"
+    
+  # Key performance indicators
+  kpis:
+    - "total_return"
+    - "annualized_return"
+    - "volatility"
+    - "sharpe_ratio"
+    - "sortino_ratio"
+    - "max_drawdown"
+    - "win_rate"
+    - "profit_factor"
+    - "average_win"
+    - "average_loss"
+    - "largest_win"
+    - "largest_loss"
+    - "consecutive_wins"
+    - "consecutive_losses"
+    - "calmar_ratio"
+    - "var_95"
+    - "expected_shortfall"
+    
+  # Alerts
+  alerts:
+    performance_degradation:
+      enabled: true
+      threshold: -0.05  # 5% decline in performance
+      lookback_days: 30
+      
+    drawdown_alert:
+      enabled: true
+      threshold: 0.10  # 10% drawdown
+      
+    win_rate_alert:
+      enabled: true
+      threshold: 0.45  # Below 45% win rate
+      min_trades: 20
+
+# API Configuration
+api:
+  # FastAPI settings
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
+  reload: false
+  
+  # Security
+  security:
+    api_key_header: "X-API-Key"
+    api_keys:
+      - "${API_KEY_1}"
+      - "${API_KEY_2}"
+    cors_origins:
+      - "http://localhost:3000"
+      - "https://your-frontend-domain.com"
+    rate_limiting:
+      requests_per_minute: 100
+      burst_limit: 20
+  
+  # Documentation
+  docs:
+    title: "AGI Forex Trading System API"
+    description: "Advanced AI-powered forex trading system"
+    version: "2.0.0"
+    openapi_url: "/openapi.json"
+    docs_url: "/docs"
+    redoc_url: "/redoc"
+
+# Monitoring and Alerting Configuration
+monitoring:
+  # Prometheus metrics
+  prometheus:
+    enabled: true
+    port: 9090
+    metrics_path: "/metrics"
+    
+  # Grafana dashboards
+  grafana:
+    enabled: true
+    url: "http://localhost:3000"
+    api_key: "${GRAFANA_API_KEY}"
+    
+  # Health checks
+  health_checks:
+    interval_seconds: 30
+    timeout_seconds: 10
+    endpoints:
+      - name: "database"
+        type: "database"
+        critical: true
+      - name: "redis"
+        type: "redis"
+        critical: true
+      - name: "data_providers"
+        type: "external_api"
+        critical: false
+      - name: "telegram_bot"
+        type: "telegram"
+        critical: false
+        
+  # Alerting
+  alerting:
+    email:
+      enabled: true
+      smtp_server: "smtp.gmail.com"
+      smtp_port: 587
+      username: "${EMAIL_USERNAME}"
+      password: "${EMAIL_PASSWORD}"
+      from_address: "agi-forex@yourdomain.com"
+      to_addresses:
+        - "admin@yourdomain.com"
+        - "trader@yourdomain.com"
+    
+    slack:
+      enabled: false
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      channel: "#forex-alerts"
+    
+    telegram:
+      enabled: true
+      chat_id: "${TELEGRAM_ADMIN_CHAT_ID}"
+
+# Backup and Recovery Configuration
+backup:
+  # Database backups
+  database:
+    enabled: true
+    frequency: "daily"
+    retention_days: 30
+    storage_location: "/backups/database"
+    compression: true
+    
+  # Model backups
+  models:
+    enabled: true
+    frequency: "weekly"
+    retention_weeks: 12
+    storage_location: "/backups/models"
+    
+  # Configuration backups
+  config:
+    enabled: true
+    frequency: "daily"
+    retention_days: 90
+    storage_location: "/backups/config"
+
+# Security Configuration
+security:
+  # Encryption
+  encryption:
+    algorithm: "AES-256-GCM"
+    key_rotation_days: 90
+    
+  # Authentication
+  authentication:
+    jwt_secret: "${JWT_SECRET}"
+    jwt_expiry_hours: 24
+    refresh_token_expiry_days: 30
+    
+  # API security
+  api_security:
+    rate_limiting: true
+    ip_whitelisting: false
+    request_logging: true
+    response_sanitization: true
+    
+  # Data protection
+  data_protection:
+    pii_encryption: true
+    audit_logging: true
+    data_retention_days: 2555  # 7 years
+    gdpr_compliance: true
+
+# Development and Testing Configuration
+development:
+  # Testing
+  testing:
+    unit_tests: true
+    integration_tests: true
+    performance_tests: true
+    backtesting: true
+    
+  # Debugging
+  debugging:
+    profiling: false
+    memory_monitoring: true
+    performance_monitoring: true
+    
+  # Mock data
+  mock_data:
+    enabled: false
+    market_data: true
+    news_data: true
+    economic_data: true
+
+# Deployment Configuration
+deployment:
+  # Docker
+  docker:
+    enabled: true
+    registry: "your-registry.com"
+    image_tag: "latest"
+    
+  # Kubernetes
+  kubernetes:
+    enabled: false
+    namespace: "forex-agi"
+    replicas: 3
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "2000m"
+        memory: "4Gi"
+    
+  # Environment variables
+  environment_variables:
+    - "DB_PASSWORD"
+    - "REDIS_PASSWORD"
+    - "OANDA_API_KEY"
+    - "TELEGRAM_BOT_TOKEN"
+    - "API_KEY_1"
+    - "JWT_SECRET"

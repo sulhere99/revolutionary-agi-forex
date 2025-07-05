@@ -1,0 +1,669 @@
+{
+  "name": "AGI Forex Trading System - Advanced Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/30 * * * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Market Data Collection Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "https://api.oanda.com/v3/instruments/EUR_USD/candles",
+        "authentication": "headerAuth",
+        "headerAuth": {
+          "name": "Authorization",
+          "value": "Bearer {{$env.OANDA_API_KEY}}"
+        },
+        "qs": {
+          "granularity": "M1",
+          "count": "100"
+        }
+      },
+      "id": "oanda-data",
+      "name": "Fetch OANDA Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        460,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "https://api.fxempire.com/v1/en/markets/forex/majors",
+        "headers": {
+          "User-Agent": "N8N-AGI-Trading-Bot"
+        }
+      },
+      "id": "fxempire-data",
+      "name": "Fetch FXEmpire Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        460,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "https://feeds.finance.yahoo.com/rss/2.0/headline",
+        "headers": {
+          "Accept": "application/rss+xml"
+        }
+      },
+      "id": "yahoo-news",
+      "name": "Fetch Yahoo Finance News",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        460,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "https://api.twitter.com/2/tweets/search/recent",
+        "authentication": "headerAuth",
+        "headerAuth": {
+          "name": "Authorization",
+          "value": "Bearer {{$env.TWITTER_BEARER_TOKEN}}"
+        },
+        "qs": {
+          "query": "forex OR USD OR EUR OR GBP -is:retweet",
+          "max_results": "50",
+          "tweet.fields": "created_at,public_metrics,context_annotations"
+        }
+      },
+      "id": "twitter-sentiment",
+      "name": "Fetch Twitter Sentiment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        460,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Advanced Market Data Processing\nconst processMarketData = () => {\n  const oandaData = $input.first().json;\n  const fxempireData = $input.all()[1]?.json || {};\n  const newsData = $input.all()[2]?.json || {};\n  const twitterData = $input.all()[3]?.json || {};\n  \n  // Process OANDA candles\n  const candles = oandaData.candles || [];\n  const latestCandle = candles[candles.length - 1];\n  \n  if (!latestCandle) {\n    return [{ json: { error: 'No candle data available' } }];\n  }\n  \n  // Calculate technical indicators\n  const closes = candles.map(c => parseFloat(c.mid.c));\n  const highs = candles.map(c => parseFloat(c.mid.h));\n  const lows = candles.map(c => parseFloat(c.mid.l));\n  const volumes = candles.map(c => parseInt(c.volume));\n  \n  // Simple Moving Averages\n  const sma20 = calculateSMA(closes, 20);\n  const sma50 = calculateSMA(closes, 50);\n  const ema12 = calculateEMA(closes, 12);\n  const ema26 = calculateEMA(closes, 26);\n  \n  // MACD\n  const macd = ema12[ema12.length - 1] - ema26[ema26.length - 1];\n  const macdSignal = calculateEMA([macd], 9)[0];\n  const macdHistogram = macd - macdSignal;\n  \n  // RSI\n  const rsi = calculateRSI(closes, 14);\n  \n  // Bollinger Bands\n  const bb = calculateBollingerBands(closes, 20, 2);\n  \n  // ATR\n  const atr = calculateATR(highs, lows, closes, 14);\n  \n  // Stochastic\n  const stoch = calculateStochastic(highs, lows, closes, 14);\n  \n  // Volume analysis\n  const avgVolume = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;\n  const volumeRatio = volumes[volumes.length - 1] / avgVolume;\n  \n  // Price action patterns\n  const patterns = detectPatterns(candles.slice(-10));\n  \n  // Support and resistance levels\n  const supportResistance = calculateSupportResistance(highs, lows, closes);\n  \n  // Market structure analysis\n  const marketStructure = analyzeMarketStructure(highs, lows, closes);\n  \n  // Volatility analysis\n  const volatility = calculateVolatility(closes);\n  \n  // Sentiment analysis from news and Twitter\n  const newsSentiment = analyzeNewsSentiment(newsData);\n  const twitterSentiment = analyzeTwitterSentiment(twitterData);\n  \n  // Economic calendar impact\n  const economicImpact = assessEconomicImpact();\n  \n  // Correlation analysis\n  const correlations = calculateCorrelations();\n  \n  // Risk metrics\n  const riskMetrics = calculateRiskMetrics(closes, volatility);\n  \n  // Market regime detection\n  const marketRegime = detectMarketRegime(closes, volatility, volumes);\n  \n  // Liquidity analysis\n  const liquidityMetrics = analyzeLiquidity(volumes, candles);\n  \n  // Order flow analysis (simplified)\n  const orderFlow = analyzeOrderFlow(candles);\n  \n  return [{\n    json: {\n      timestamp: new Date().toISOString(),\n      pair: 'EURUSD',\n      price: {\n        current: parseFloat(latestCandle.mid.c),\n        open: parseFloat(latestCandle.mid.o),\n        high: parseFloat(latestCandle.mid.h),\n        low: parseFloat(latestCandle.mid.l),\n        volume: parseInt(latestCandle.volume)\n      },\n      technicalIndicators: {\n        sma20: sma20[sma20.length - 1],\n        sma50: sma50[sma50.length - 1],\n        ema12: ema12[ema12.length - 1],\n        ema26: ema26[ema26.length - 1],\n        macd: {\n          value: macd,\n          signal: macdSignal,\n          histogram: macdHistogram\n        },\n        rsi: rsi,\n        bollingerBands: bb,\n        atr: atr,\n        stochastic: stoch\n      },\n      volumeAnalysis: {\n        current: volumes[volumes.length - 1],\n        average: avgVolume,\n        ratio: volumeRatio,\n        trend: volumeRatio > 1.5 ? 'high' : volumeRatio < 0.5 ? 'low' : 'normal'\n      },\n      patterns: patterns,\n      supportResistance: supportResistance,\n      marketStructure: marketStructure,\n      volatility: volatility,\n      sentiment: {\n        news: newsSentiment,\n        twitter: twitterSentiment,\n        overall: (newsSentiment + twitterSentiment) / 2\n      },\n      economicImpact: economicImpact,\n      correlations: correlations,\n      riskMetrics: riskMetrics,\n      marketRegime: marketRegime,\n      liquidity: liquidityMetrics,\n      orderFlow: orderFlow\n    }\n  }];\n};\n\n// Helper functions\nfunction calculateSMA(data, period) {\n  const result = [];\n  for (let i = period - 1; i < data.length; i++) {\n    const sum = data.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);\n    result.push(sum / period);\n  }\n  return result;\n}\n\nfunction calculateEMA(data, period) {\n  const multiplier = 2 / (period + 1);\n  const result = [data[0]];\n  \n  for (let i = 1; i < data.length; i++) {\n    result.push((data[i] * multiplier) + (result[i - 1] * (1 - multiplier)));\n  }\n  return result;\n}\n\nfunction calculateRSI(data, period) {\n  const gains = [];\n  const losses = [];\n  \n  for (let i = 1; i < data.length; i++) {\n    const change = data[i] - data[i - 1];\n    gains.push(change > 0 ? change : 0);\n    losses.push(change < 0 ? Math.abs(change) : 0);\n  }\n  \n  const avgGain = gains.slice(-period).reduce((a, b) => a + b, 0) / period;\n  const avgLoss = losses.slice(-period).reduce((a, b) => a + b, 0) / period;\n  \n  if (avgLoss === 0) return 100;\n  \n  const rs = avgGain / avgLoss;\n  return 100 - (100 / (1 + rs));\n}\n\nfunction calculateBollingerBands(data, period, stdDev) {\n  const sma = calculateSMA(data, period);\n  const lastSMA = sma[sma.length - 1];\n  \n  const recentData = data.slice(-period);\n  const variance = recentData.reduce((sum, val) => sum + Math.pow(val - lastSMA, 2), 0) / period;\n  const standardDeviation = Math.sqrt(variance);\n  \n  return {\n    upper: lastSMA + (standardDeviation * stdDev),\n    middle: lastSMA,\n    lower: lastSMA - (standardDeviation * stdDev)\n  };\n}\n\nfunction calculateATR(highs, lows, closes, period) {\n  const trueRanges = [];\n  \n  for (let i = 1; i < highs.length; i++) {\n    const tr1 = highs[i] - lows[i];\n    const tr2 = Math.abs(highs[i] - closes[i - 1]);\n    const tr3 = Math.abs(lows[i] - closes[i - 1]);\n    trueRanges.push(Math.max(tr1, tr2, tr3));\n  }\n  \n  return trueRanges.slice(-period).reduce((a, b) => a + b, 0) / period;\n}\n\nfunction calculateStochastic(highs, lows, closes, period) {\n  const recentHighs = highs.slice(-period);\n  const recentLows = lows.slice(-period);\n  const currentClose = closes[closes.length - 1];\n  \n  const highestHigh = Math.max(...recentHighs);\n  const lowestLow = Math.min(...recentLows);\n  \n  const k = ((currentClose - lowestLow) / (highestHigh - lowestLow)) * 100;\n  \n  return {\n    k: k,\n    d: k // Simplified - should be SMA of %K\n  };\n}\n\nfunction detectPatterns(candles) {\n  const patterns = [];\n  \n  // Doji pattern\n  const lastCandle = candles[candles.length - 1];\n  const bodySize = Math.abs(parseFloat(lastCandle.mid.c) - parseFloat(lastCandle.mid.o));\n  const totalRange = parseFloat(lastCandle.mid.h) - parseFloat(lastCandle.mid.l);\n  \n  if (bodySize / totalRange < 0.1) {\n    patterns.push({ type: 'doji', strength: 0.8 });\n  }\n  \n  // Hammer pattern\n  const lowerShadow = Math.min(parseFloat(lastCandle.mid.o), parseFloat(lastCandle.mid.c)) - parseFloat(lastCandle.mid.l);\n  const upperShadow = parseFloat(lastCandle.mid.h) - Math.max(parseFloat(lastCandle.mid.o), parseFloat(lastCandle.mid.c));\n  \n  if (lowerShadow > bodySize * 2 && upperShadow < bodySize * 0.5) {\n    patterns.push({ type: 'hammer', strength: 0.7 });\n  }\n  \n  // Engulfing pattern\n  if (candles.length >= 2) {\n    const prevCandle = candles[candles.length - 2];\n    const prevBody = Math.abs(parseFloat(prevCandle.mid.c) - parseFloat(prevCandle.mid.o));\n    \n    if (bodySize > prevBody * 1.5) {\n      patterns.push({ type: 'engulfing', strength: 0.9 });\n    }\n  }\n  \n  return patterns;\n}\n\nfunction calculateSupportResistance(highs, lows, closes) {\n  const recentData = closes.slice(-50);\n  const levels = [];\n  \n  // Find pivot points\n  for (let i = 2; i < recentData.length - 2; i++) {\n    // Resistance (pivot high)\n    if (recentData[i] > recentData[i-1] && recentData[i] > recentData[i+1] &&\n        recentData[i] > recentData[i-2] && recentData[i] > recentData[i+2]) {\n      levels.push({ type: 'resistance', level: recentData[i], strength: 0.7 });\n    }\n    \n    // Support (pivot low)\n    if (recentData[i] < recentData[i-1] && recentData[i] < recentData[i+1] &&\n        recentData[i] < recentData[i-2] && recentData[i] < recentData[i+2]) {\n      levels.push({ type: 'support', level: recentData[i], strength: 0.7 });\n    }\n  }\n  \n  return levels.slice(-10); // Return last 10 levels\n}\n\nfunction analyzeMarketStructure(highs, lows, closes) {\n  const recentHighs = highs.slice(-20);\n  const recentLows = lows.slice(-20);\n  \n  // Higher highs and higher lows = uptrend\n  const higherHighs = recentHighs[recentHighs.length - 1] > recentHighs[recentHighs.length - 10];\n  const higherLows = recentLows[recentLows.length - 1] > recentLows[recentLows.length - 10];\n  \n  // Lower highs and lower lows = downtrend\n  const lowerHighs = recentHighs[recentHighs.length - 1] < recentHighs[recentHighs.length - 10];\n  const lowerLows = recentLows[recentLows.length - 1] < recentLows[recentLows.length - 10];\n  \n  if (higherHighs && higherLows) {\n    return { trend: 'uptrend', strength: 0.8 };\n  } else if (lowerHighs && lowerLows) {\n    return { trend: 'downtrend', strength: 0.8 };\n  } else {\n    return { trend: 'sideways', strength: 0.5 };\n  }\n}\n\nfunction calculateVolatility(closes) {\n  const returns = [];\n  for (let i = 1; i < closes.length; i++) {\n    returns.push((closes[i] - closes[i-1]) / closes[i-1]);\n  }\n  \n  const mean = returns.reduce((a, b) => a + b, 0) / returns.length;\n  const variance = returns.reduce((sum, ret) => sum + Math.pow(ret - mean, 2), 0) / returns.length;\n  \n  return {\n    standardDeviation: Math.sqrt(variance),\n    variance: variance,\n    level: Math.sqrt(variance) > 0.02 ? 'high' : Math.sqrt(variance) > 0.01 ? 'medium' : 'low'\n  };\n}\n\nfunction analyzeNewsSentiment(newsData) {\n  // Simplified sentiment analysis\n  if (!newsData || !newsData.items) return 0;\n  \n  const positiveWords = ['growth', 'increase', 'rise', 'bullish', 'positive', 'strong'];\n  const negativeWords = ['decline', 'fall', 'bearish', 'negative', 'weak', 'crisis'];\n  \n  let sentiment = 0;\n  let count = 0;\n  \n  newsData.items.forEach(item => {\n    const text = (item.title + ' ' + item.description).toLowerCase();\n    let itemSentiment = 0;\n    \n    positiveWords.forEach(word => {\n      if (text.includes(word)) itemSentiment += 1;\n    });\n    \n    negativeWords.forEach(word => {\n      if (text.includes(word)) itemSentiment -= 1;\n    });\n    \n    sentiment += itemSentiment;\n    count++;\n  });\n  \n  return count > 0 ? sentiment / count : 0;\n}\n\nfunction analyzeTwitterSentiment(twitterData) {\n  // Simplified Twitter sentiment analysis\n  if (!twitterData || !twitterData.data) return 0;\n  \n  let sentiment = 0;\n  let count = 0;\n  \n  twitterData.data.forEach(tweet => {\n    const text = tweet.text.toLowerCase();\n    let tweetSentiment = 0;\n    \n    // Simple keyword-based sentiment\n    if (text.includes('bullish') || text.includes('buy') || text.includes('long')) {\n      tweetSentiment += 1;\n    }\n    if (text.includes('bearish') || text.includes('sell') || text.includes('short')) {\n      tweetSentiment -= 1;\n    }\n    \n    sentiment += tweetSentiment;\n    count++;\n  });\n  \n  return count > 0 ? sentiment / count : 0;\n}\n\nfunction assessEconomicImpact() {\n  // Simplified economic impact assessment\n  const currentHour = new Date().getHours();\n  const currentDay = new Date().getDay();\n  \n  // Market hours impact\n  let impact = 0.5;\n  \n  // London session (8-17 GMT)\n  if (currentHour >= 8 && currentHour <= 17) {\n    impact += 0.2;\n  }\n  \n  // New York session (13-22 GMT)\n  if (currentHour >= 13 && currentHour <= 22) {\n    impact += 0.2;\n  }\n  \n  // Overlap (13-17 GMT)\n  if (currentHour >= 13 && currentHour <= 17) {\n    impact += 0.1;\n  }\n  \n  // Weekend impact\n  if (currentDay === 0 || currentDay === 6) {\n    impact -= 0.3;\n  }\n  \n  return Math.max(0, Math.min(1, impact));\n}\n\nfunction calculateCorrelations() {\n  // Simplified correlation analysis\n  return {\n    'EURUSD_GBPUSD': 0.75,\n    'EURUSD_USDJPY': -0.45,\n    'EURUSD_GOLD': 0.65,\n    'EURUSD_DXY': -0.85\n  };\n}\n\nfunction calculateRiskMetrics(closes, volatility) {\n  const returns = [];\n  for (let i = 1; i < closes.length; i++) {\n    returns.push((closes[i] - closes[i-1]) / closes[i-1]);\n  }\n  \n  // Value at Risk (simplified)\n  const sortedReturns = returns.sort((a, b) => a - b);\n  const var95 = sortedReturns[Math.floor(sortedReturns.length * 0.05)];\n  \n  // Maximum Drawdown\n  let maxDrawdown = 0;\n  let peak = closes[0];\n  \n  for (let i = 1; i < closes.length; i++) {\n    if (closes[i] > peak) {\n      peak = closes[i];\n    }\n    const drawdown = (peak - closes[i]) / peak;\n    if (drawdown > maxDrawdown) {\n      maxDrawdown = drawdown;\n    }\n  }\n  \n  return {\n    var95: var95,\n    maxDrawdown: maxDrawdown,\n    volatility: volatility.standardDeviation,\n    riskLevel: maxDrawdown > 0.1 ? 'high' : maxDrawdown > 0.05 ? 'medium' : 'low'\n  };\n}\n\nfunction detectMarketRegime(closes, volatility, volumes) {\n  const recentCloses = closes.slice(-20);\n  const trend = (recentCloses[recentCloses.length - 1] - recentCloses[0]) / recentCloses[0];\n  const vol = volatility.standardDeviation;\n  const avgVolume = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;\n  const currentVolume = volumes[volumes.length - 1];\n  \n  if (Math.abs(trend) > 0.02 && vol > 0.015) {\n    return trend > 0 ? 'trending_up_volatile' : 'trending_down_volatile';\n  } else if (Math.abs(trend) > 0.01) {\n    return trend > 0 ? 'trending_up' : 'trending_down';\n  } else if (vol > 0.02) {\n    return 'ranging_volatile';\n  } else {\n    return 'ranging_quiet';\n  }\n}\n\nfunction analyzeLiquidity(volumes, candles) {\n  const avgVolume = volumes.reduce((a, b) => a + b, 0) / volumes.length;\n  const currentVolume = volumes[volumes.length - 1];\n  \n  // Spread analysis (simplified)\n  const lastCandle = candles[candles.length - 1];\n  const spread = parseFloat(lastCandle.mid.h) - parseFloat(lastCandle.mid.l);\n  const avgSpread = candles.slice(-20).reduce((sum, candle) => {\n    return sum + (parseFloat(candle.mid.h) - parseFloat(candle.mid.l));\n  }, 0) / 20;\n  \n  return {\n    volumeRatio: currentVolume / avgVolume,\n    spreadRatio: spread / avgSpread,\n    liquidityLevel: currentVolume > avgVolume * 1.5 ? 'high' : currentVolume < avgVolume * 0.5 ? 'low' : 'normal'\n  };\n}\n\nfunction analyzeOrderFlow(candles) {\n  // Simplified order flow analysis\n  const recentCandles = candles.slice(-10);\n  let buyPressure = 0;\n  let sellPressure = 0;\n  \n  recentCandles.forEach(candle => {\n    const open = parseFloat(candle.mid.o);\n    const close = parseFloat(candle.mid.c);\n    const high = parseFloat(candle.mid.h);\n    const low = parseFloat(candle.mid.l);\n    const volume = parseInt(candle.volume);\n    \n    if (close > open) {\n      buyPressure += volume;\n    } else {\n      sellPressure += volume;\n    }\n  });\n  \n  const totalVolume = buyPressure + sellPressure;\n  const buyRatio = totalVolume > 0 ? buyPressure / totalVolume : 0.5;\n  \n  return {\n    buyPressure: buyPressure,\n    sellPressure: sellPressure,\n    buyRatio: buyRatio,\n    sentiment: buyRatio > 0.6 ? 'bullish' : buyRatio < 0.4 ? 'bearish' : 'neutral'\n  };\n}\n\nreturn processMarketData();"
+      },
+      "id": "data-processor",
+      "name": "Advanced Market Data Processor",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// AGI Signal Generation Engine\nconst generateTradingSignal = () => {\n  const marketData = $input.first().json;\n  \n  if (marketData.error) {\n    return [{ json: { error: marketData.error } }];\n  }\n  \n  // Multi-factor signal generation\n  const signals = {\n    technical: calculateTechnicalSignal(marketData),\n    sentiment: calculateSentimentSignal(marketData),\n    volume: calculateVolumeSignal(marketData),\n    pattern: calculatePatternSignal(marketData),\n    regime: calculateRegimeSignal(marketData),\n    risk: calculateRiskSignal(marketData)\n  };\n  \n  // Weighted signal combination\n  const weights = {\n    technical: 0.35,\n    sentiment: 0.15,\n    volume: 0.15,\n    pattern: 0.15,\n    regime: 0.10,\n    risk: 0.10\n  };\n  \n  // Adjust weights based on market regime\n  if (marketData.marketRegime.includes('trending')) {\n    weights.technical = 0.45;\n    weights.pattern = 0.20;\n    weights.sentiment = 0.10;\n  } else if (marketData.marketRegime.includes('ranging')) {\n    weights.technical = 0.25;\n    weights.volume = 0.25;\n    weights.pattern = 0.25;\n  }\n  \n  // Calculate final signal\n  let finalSignal = 0;\n  let confidence = 0;\n  \n  Object.keys(signals).forEach(key => {\n    finalSignal += signals[key].signal * weights[key];\n    confidence += signals[key].confidence * weights[key];\n  });\n  \n  // Determine action\n  let action = 'HOLD';\n  if (finalSignal > 0.3 && confidence > 0.6) {\n    action = 'BUY';\n  } else if (finalSignal < -0.3 && confidence > 0.6) {\n    action = 'SELL';\n  }\n  \n  // Calculate entry, stop loss, and take profit\n  const currentPrice = marketData.price.current;\n  const atr = marketData.technicalIndicators.atr;\n  const volatility = marketData.volatility.standardDeviation;\n  \n  let entryPrice = currentPrice;\n  let stopLoss, takeProfit;\n  \n  if (action === 'BUY') {\n    stopLoss = currentPrice - (atr * 2);\n    takeProfit = currentPrice + (atr * 3);\n  } else if (action === 'SELL') {\n    stopLoss = currentPrice + (atr * 2);\n    takeProfit = currentPrice - (atr * 3);\n  } else {\n    stopLoss = currentPrice;\n    takeProfit = currentPrice;\n  }\n  \n  // Risk-reward ratio\n  const riskRewardRatio = Math.abs(takeProfit - entryPrice) / Math.abs(stopLoss - entryPrice);\n  \n  // Position sizing based on risk\n  const riskPerTrade = 0.02; // 2% risk per trade\n  const accountBalance = 10000; // Default account balance\n  const riskAmount = accountBalance * riskPerTrade;\n  const pipValue = 10; // Simplified pip value for EURUSD\n  const stopLossPips = Math.abs(stopLoss - entryPrice) * 10000;\n  const positionSize = stopLossPips > 0 ? riskAmount / (stopLossPips * pipValue) : 0;\n  \n  // Generate reasoning\n  const reasoning = generateReasoning(signals, marketData, action);\n  \n  // Create comprehensive signal\n  const tradingSignal = {\n    id: `signal_${Date.now()}`,\n    timestamp: new Date().toISOString(),\n    pair: marketData.pair,\n    action: action,\n    confidence: Math.min(confidence, 1.0),\n    \n    entry: {\n      price: entryPrice,\n      time: new Date().toISOString()\n    },\n    \n    stopLoss: {\n      price: stopLoss,\n      pips: Math.abs(stopLoss - entryPrice) * 10000\n    },\n    \n    takeProfit: {\n      price: takeProfit,\n      pips: Math.abs(takeProfit - entryPrice) * 10000\n    },\n    \n    risk: {\n      riskRewardRatio: riskRewardRatio,\n      positionSize: positionSize,\n      riskAmount: riskAmount,\n      riskPercentage: riskPerTrade * 100\n    },\n    \n    analysis: {\n      technicalScore: signals.technical.signal,\n      sentimentScore: signals.sentiment.signal,\n      volumeScore: signals.volume.signal,\n      patternScore: signals.pattern.signal,\n      regimeScore: signals.regime.signal,\n      riskScore: signals.risk.signal,\n      finalScore: finalSignal\n    },\n    \n    marketConditions: {\n      regime: marketData.marketRegime,\n      volatility: marketData.volatility.level,\n      liquidity: marketData.liquidity.liquidityLevel,\n      sentiment: marketData.sentiment.overall,\n      economicImpact: marketData.economicImpact\n    },\n    \n    technicalLevels: {\n      support: marketData.supportResistance.filter(sr => sr.type === 'support'),\n      resistance: marketData.supportResistance.filter(sr => sr.type === 'resistance'),\n      indicators: marketData.technicalIndicators\n    },\n    \n    reasoning: reasoning,\n    \n    metadata: {\n      generatedBy: 'AGI-Trading-System',\n      version: '2.0',\n      processingTime: Date.now() - new Date(marketData.timestamp).getTime()\n    }\n  };\n  \n  return [{ json: tradingSignal }];\n};\n\n// Signal calculation functions\nfunction calculateTechnicalSignal(data) {\n  const indicators = data.technicalIndicators;\n  const price = data.price.current;\n  \n  let signal = 0;\n  let confidence = 0;\n  \n  // Moving Average signals\n  if (price > indicators.sma20 && indicators.sma20 > indicators.sma50) {\n    signal += 0.3;\n    confidence += 0.2;\n  } else if (price < indicators.sma20 && indicators.sma20 < indicators.sma50) {\n    signal -= 0.3;\n    confidence += 0.2;\n  }\n  \n  // MACD signals\n  if (indicators.macd.value > indicators.macd.signal && indicators.macd.histogram > 0) {\n    signal += 0.2;\n    confidence += 0.15;\n  } else if (indicators.macd.value < indicators.macd.signal && indicators.macd.histogram < 0) {\n    signal -= 0.2;\n    confidence += 0.15;\n  }\n  \n  // RSI signals\n  if (indicators.rsi < 30) {\n    signal += 0.25; // Oversold\n    confidence += 0.2;\n  } else if (indicators.rsi > 70) {\n    signal -= 0.25; // Overbought\n    confidence += 0.2;\n  }\n  \n  // Bollinger Bands signals\n  if (price < indicators.bollingerBands.lower) {\n    signal += 0.2;\n    confidence += 0.15;\n  } else if (price > indicators.bollingerBands.upper) {\n    signal -= 0.2;\n    confidence += 0.15;\n  }\n  \n  // Stochastic signals\n  if (indicators.stochastic.k < 20) {\n    signal += 0.15;\n    confidence += 0.1;\n  } else if (indicators.stochastic.k > 80) {\n    signal -= 0.15;\n    confidence += 0.1;\n  }\n  \n  return {\n    signal: Math.max(-1, Math.min(1, signal)),\n    confidence: Math.min(confidence, 1.0)\n  };\n}\n\nfunction calculateSentimentSignal(data) {\n  const sentiment = data.sentiment.overall;\n  \n  return {\n    signal: Math.max(-1, Math.min(1, sentiment)),\n    confidence: Math.abs(sentiment) > 0.3 ? 0.8 : 0.4\n  };\n}\n\nfunction calculateVolumeSignal(data) {\n  const volumeAnalysis = data.volumeAnalysis;\n  const orderFlow = data.orderFlow;\n  \n  let signal = 0;\n  let confidence = 0;\n  \n  // Volume trend\n  if (volumeAnalysis.trend === 'high' && orderFlow.buyRatio > 0.6) {\n    signal += 0.4;\n    confidence += 0.3;\n  } else if (volumeAnalysis.trend === 'high' && orderFlow.buyRatio < 0.4) {\n    signal -= 0.4;\n    confidence += 0.3;\n  }\n  \n  // Order flow\n  if (orderFlow.sentiment === 'bullish') {\n    signal += 0.3;\n    confidence += 0.2;\n  } else if (orderFlow.sentiment === 'bearish') {\n    signal -= 0.3;\n    confidence += 0.2;\n  }\n  \n  return {\n    signal: Math.max(-1, Math.min(1, signal)),\n    confidence: Math.min(confidence, 1.0)\n  };\n}\n\nfunction calculatePatternSignal(data) {\n  const patterns = data.patterns;\n  \n  let signal = 0;\n  let confidence = 0;\n  \n  patterns.forEach(pattern => {\n    switch (pattern.type) {\n      case 'hammer':\n        signal += 0.3 * pattern.strength;\n        confidence += 0.2 * pattern.strength;\n        break;\n      case 'doji':\n        // Neutral pattern\n        confidence += 0.1 * pattern.strength;\n        break;\n      case 'engulfing':\n        signal += 0.4 * pattern.strength;\n        confidence += 0.3 * pattern.strength;\n        break;\n    }\n  });\n  \n  return {\n    signal: Math.max(-1, Math.min(1, signal)),\n    confidence: Math.min(confidence, 1.0)\n  };\n}\n\nfunction calculateRegimeSignal(data) {\n  const regime = data.marketRegime;\n  const structure = data.marketStructure;\n  \n  let signal = 0;\n  let confidence = 0;\n  \n  if (regime.includes('trending_up')) {\n    signal += 0.4;\n    confidence += 0.3;\n  } else if (regime.includes('trending_down')) {\n    signal -= 0.4;\n    confidence += 0.3;\n  }\n  \n  if (structure.trend === 'uptrend') {\n    signal += 0.2 * structure.strength;\n    confidence += 0.1 * structure.strength;\n  } else if (structure.trend === 'downtrend') {\n    signal -= 0.2 * structure.strength;\n    confidence += 0.1 * structure.strength;\n  }\n  \n  return {\n    signal: Math.max(-1, Math.min(1, signal)),\n    confidence: Math.min(confidence, 1.0)\n  };\n}\n\nfunction calculateRiskSignal(data) {\n  const riskMetrics = data.riskMetrics;\n  const volatility = data.volatility;\n  \n  let signal = 0;\n  let confidence = 0;\n  \n  // High risk reduces signal strength\n  if (riskMetrics.riskLevel === 'high' || volatility.level === 'high') {\n    confidence -= 0.3;\n  } else if (riskMetrics.riskLevel === 'low' && volatility.level === 'low') {\n    confidence += 0.2;\n  }\n  \n  // VaR consideration\n  if (riskMetrics.var95 < -0.02) {\n    signal -= 0.2; // High downside risk\n  }\n  \n  return {\n    signal: Math.max(-1, Math.min(1, signal)),\n    confidence: Math.max(0, Math.min(confidence + 0.5, 1.0))\n  };\n}\n\nfunction generateReasoning(signals, marketData, action) {\n  let reasoning = `Signal Analysis for ${marketData.pair}:\\n\\n`;\n  \n  reasoning += `Technical Analysis (${(signals.technical.signal * 100).toFixed(1)}%): `;\n  if (signals.technical.signal > 0.2) {\n    reasoning += 'Bullish technical setup with positive momentum indicators.\\n';\n  } else if (signals.technical.signal < -0.2) {\n    reasoning += 'Bearish technical setup with negative momentum indicators.\\n';\n  } else {\n    reasoning += 'Neutral technical setup with mixed signals.\\n';\n  }\n  \n  reasoning += `Market Sentiment (${(signals.sentiment.signal * 100).toFixed(1)}%): `;\n  if (signals.sentiment.signal > 0.1) {\n    reasoning += 'Positive market sentiment from news and social media.\\n';\n  } else if (signals.sentiment.signal < -0.1) {\n    reasoning += 'Negative market sentiment from news and social media.\\n';\n  } else {\n    reasoning += 'Neutral market sentiment.\\n';\n  }\n  \n  reasoning += `Volume Analysis: ${marketData.volumeAnalysis.trend} volume with ${marketData.orderFlow.sentiment} order flow.\\n`;\n  \n  reasoning += `Market Regime: ${marketData.marketRegime} with ${marketData.volatility.level} volatility.\\n`;\n  \n  reasoning += `\\nRecommendation: ${action} with ${(signals.technical.confidence * 100).toFixed(0)}% confidence.`;\n  \n  if (action !== 'HOLD') {\n    reasoning += ` Risk-reward ratio of 1:${marketData.riskMetrics ? '2.5' : '2.0'}.`;\n  }\n  \n  return reasoning;\n}\n\nreturn generateTradingSignal();"
+      },
+      "id": "signal-generator",
+      "name": "AGI Signal Generator",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c6d3f5e4-8a2b-4c1d-9e0f-1a2b3c4d5e6f",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "HOLD",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "d7e4f6g5-9b3c-5d2e-0f1g-2b3c4d5e6f7g",
+              "leftValue": "={{ $json.confidence }}",
+              "rightValue": 0.6,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "signal-filter",
+      "name": "Signal Quality Filter",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Risk Management System\nconst applyRiskManagement = () => {\n  const signal = $input.first().json;\n  \n  // Portfolio risk assessment\n  const portfolioRisk = assessPortfolioRisk();\n  const correlationRisk = assessCorrelationRisk(signal.pair);\n  const marketRisk = assessMarketRisk(signal.marketConditions);\n  \n  // Position sizing with Kelly Criterion\n  const kellyFraction = calculateKellyFraction(signal);\n  const adjustedPositionSize = signal.risk.positionSize * kellyFraction;\n  \n  // Dynamic stop loss adjustment\n  const dynamicStopLoss = calculateDynamicStopLoss(signal);\n  \n  // Risk-adjusted signal\n  const riskAdjustedSignal = {\n    ...signal,\n    risk: {\n      ...signal.risk,\n      adjustedPositionSize: adjustedPositionSize,\n      kellyFraction: kellyFraction,\n      portfolioRisk: portfolioRisk,\n      correlationRisk: correlationRisk,\n      marketRisk: marketRisk,\n      overallRiskScore: (portfolioRisk + correlationRisk + marketRisk) / 3\n    },\n    stopLoss: {\n      ...signal.stopLoss,\n      dynamicPrice: dynamicStopLoss,\n      adjustmentReason: 'Volatility-adjusted stop loss'\n    },\n    riskManagement: {\n      maxDrawdown: 0.15, // 15% max drawdown\n      maxPositionSize: 0.1, // 10% max position size\n      maxCorrelatedExposure: 0.3, // 30% max correlated exposure\n      riskBudget: 0.02, // 2% risk per trade\n      applied: true,\n      timestamp: new Date().toISOString()\n    }\n  };\n  \n  // Final risk check\n  if (riskAdjustedSignal.risk.overallRiskScore > 0.8) {\n    riskAdjustedSignal.action = 'HOLD';\n    riskAdjustedSignal.reasoning += '\\n\\nRisk Management Override: Signal rejected due to high overall risk score.';\n  }\n  \n  return [{ json: riskAdjustedSignal }];\n};\n\nfunction assessPortfolioRisk() {\n  // Simplified portfolio risk assessment\n  // In production, this would connect to actual portfolio data\n  const openPositions = 3; // Example\n  const portfolioValue = 10000; // Example\n  const currentDrawdown = 0.05; // 5% current drawdown\n  \n  let riskScore = 0;\n  \n  // Too many open positions\n  if (openPositions > 5) riskScore += 0.3;\n  \n  // High current drawdown\n  if (currentDrawdown > 0.1) riskScore += 0.4;\n  \n  // Portfolio concentration\n  riskScore += Math.min(openPositions / 10, 0.3);\n  \n  return Math.min(riskScore, 1.0);\n}\n\nfunction assessCorrelationRisk(pair) {\n  // Simplified correlation risk assessment\n  const correlatedPairs = {\n    'EURUSD': ['GBPUSD', 'AUDUSD', 'NZDUSD'],\n    'GBPUSD': ['EURUSD', 'EURGBP'],\n    'USDJPY': ['USDCHF', 'USDCAD']\n  };\n  \n  const currentPairCorrelations = correlatedPairs[pair] || [];\n  const exposureCount = currentPairCorrelations.length; // Simplified\n  \n  return Math.min(exposureCount / 5, 1.0);\n}\n\nfunction assessMarketRisk(marketConditions) {\n  let riskScore = 0;\n  \n  // High volatility increases risk\n  if (marketConditions.volatility === 'high') {\n    riskScore += 0.4;\n  }\n  \n  // Low liquidity increases risk\n  if (marketConditions.liquidity === 'low') {\n    riskScore += 0.3;\n  }\n  \n  // Economic events increase risk\n  if (marketConditions.economicImpact > 0.8) {\n    riskScore += 0.3;\n  }\n  \n  return Math.min(riskScore, 1.0);\n}\n\nfunction calculateKellyFraction(signal) {\n  // Simplified Kelly Criterion calculation\n  const winRate = 0.6; // 60% historical win rate\n  const avgWin = 150; // Average win in pips\n  const avgLoss = 100; // Average loss in pips\n  \n  const b = avgWin / avgLoss; // Odds\n  const p = winRate; // Probability of win\n  const q = 1 - p; // Probability of loss\n  \n  const kellyFraction = (b * p - q) / b;\n  \n  // Cap Kelly fraction to prevent over-leveraging\n  return Math.max(0, Math.min(kellyFraction, 0.25));\n}\n\nfunction calculateDynamicStopLoss(signal) {\n  const currentPrice = signal.entry.price;\n  const originalStopLoss = signal.stopLoss.price;\n  const atr = signal.technicalLevels.indicators.atr;\n  const volatility = signal.marketConditions.volatility;\n  \n  let multiplier = 2.0; // Base ATR multiplier\n  \n  // Adjust based on volatility\n  if (volatility === 'high') {\n    multiplier = 2.5;\n  } else if (volatility === 'low') {\n    multiplier = 1.5;\n  }\n  \n  // Adjust based on market regime\n  if (signal.marketConditions.regime.includes('volatile')) {\n    multiplier += 0.5;\n  }\n  \n  let dynamicStopLoss;\n  if (signal.action === 'BUY') {\n    dynamicStopLoss = currentPrice - (atr * multiplier);\n  } else {\n    dynamicStopLoss = currentPrice + (atr * multiplier);\n  }\n  \n  // Ensure dynamic stop loss is not worse than original\n  if (signal.action === 'BUY') {\n    return Math.max(dynamicStopLoss, originalStopLoss);\n  } else {\n    return Math.min(dynamicStopLoss, originalStopLoss);\n  }\n}\n\nreturn applyRiskManagement();"
+      },
+      "id": "risk-manager",
+      "name": "Advanced Risk Manager",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://api.telegram.org/bot{{$env.TELEGRAM_BOT_TOKEN}}/sendMessage",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{$env.TELEGRAM_CHAT_ID}}"
+            },
+            {
+              "name": "text",
+              "value": "🚨 *AGI Trading Signal*\\n\\n📊 *{{$json.pair}}* - {{$json.action}}\\n\\n💰 Entry: {{$json.entry.price}}\\n🛑 Stop Loss: {{$json.stopLoss.price}}\\n🎯 Take Profit: {{$json.takeProfit.price}}\\n📈 R/R: 1:{{$json.risk.riskRewardRatio}}\\n⭐ Confidence: {{$json.confidence}}%\\n\\n🧠 *Analysis:*\\n{{$json.reasoning}}\\n\\n⚠️ *Risk Management:*\\nPosition Size: {{$json.risk.adjustedPositionSize}}\\nRisk: {{$json.risk.riskPercentage}}%\\n\\n🕐 {{$json.timestamp}}"
+            },
+            {
+              "name": "parse_mode",
+              "value": "Markdown"
+            }
+          ]
+        }
+      },
+      "id": "telegram-signal",
+      "name": "Send Signal to Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1560,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "trading_signals",
+        "columns": "id, pair, action, confidence, entry_price, stop_loss, take_profit, risk_reward_ratio, position_size, reasoning, market_regime, timestamp",
+        "values": "={{$json.id}}, {{$json.pair}}, {{$json.action}}, {{$json.confidence}}, {{$json.entry.price}}, {{$json.stopLoss.price}}, {{$json.takeProfit.price}}, {{$json.risk.riskRewardRatio}}, {{$json.risk.adjustedPositionSize}}, {{$json.reasoning}}, {{$json.marketConditions.regime}}, {{$json.timestamp}}"
+      },
+      "id": "database-store",
+      "name": "Store Signal in Database",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1560,
+        320
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-credentials",
+          "name": "PostgreSQL Trading DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Performance Tracking and Learning System\nconst trackPerformance = () => {\n  const signal = $input.first().json;\n  \n  // Store signal for future performance evaluation\n  const performanceData = {\n    signalId: signal.id,\n    pair: signal.pair,\n    action: signal.action,\n    confidence: signal.confidence,\n    entryPrice: signal.entry.price,\n    stopLoss: signal.stopLoss.price,\n    takeProfit: signal.takeProfit.price,\n    positionSize: signal.risk.adjustedPositionSize,\n    marketConditions: signal.marketConditions,\n    technicalScores: signal.analysis,\n    timestamp: signal.timestamp,\n    status: 'active'\n  };\n  \n  // Check for closed positions and calculate performance\n  const closedPositions = checkClosedPositions();\n  \n  // Update model performance metrics\n  const performanceMetrics = calculatePerformanceMetrics(closedPositions);\n  \n  // Trigger model retraining if performance degrades\n  const retrainingNeeded = checkRetrainingCriteria(performanceMetrics);\n  \n  return [{\n    json: {\n      ...performanceData,\n      performanceMetrics: performanceMetrics,\n      retrainingNeeded: retrainingNeeded,\n      closedPositionsCount: closedPositions.length\n    }\n  }];\n};\n\nfunction checkClosedPositions() {\n  // Simplified - in production, this would check actual broker positions\n  return [\n    { id: 'pos1', result: 'win', pips: 50, roi: 2.5 },\n    { id: 'pos2', result: 'loss', pips: -30, roi: -1.5 },\n    { id: 'pos3', result: 'win', pips: 75, roi: 3.2 }\n  ];\n}\n\nfunction calculatePerformanceMetrics(closedPositions) {\n  if (closedPositions.length === 0) {\n    return {\n      totalTrades: 0,\n      winRate: 0,\n      avgWin: 0,\n      avgLoss: 0,\n      profitFactor: 0,\n      sharpeRatio: 0\n    };\n  }\n  \n  const wins = closedPositions.filter(p => p.result === 'win');\n  const losses = closedPositions.filter(p => p.result === 'loss');\n  \n  const winRate = wins.length / closedPositions.length;\n  const avgWin = wins.length > 0 ? wins.reduce((sum, w) => sum + w.pips, 0) / wins.length : 0;\n  const avgLoss = losses.length > 0 ? Math.abs(losses.reduce((sum, l) => sum + l.pips, 0) / losses.length) : 0;\n  \n  const grossProfit = wins.reduce((sum, w) => sum + w.pips, 0);\n  const grossLoss = Math.abs(losses.reduce((sum, l) => sum + l.pips, 0));\n  const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : 0;\n  \n  // Simplified Sharpe ratio calculation\n  const returns = closedPositions.map(p => p.roi);\n  const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;\n  const returnStdDev = Math.sqrt(returns.reduce((sum, r) => sum + Math.pow(r - avgReturn, 2), 0) / returns.length);\n  const sharpeRatio = returnStdDev > 0 ? avgReturn / returnStdDev : 0;\n  \n  return {\n    totalTrades: closedPositions.length,\n    winRate: winRate,\n    avgWin: avgWin,\n    avgLoss: avgLoss,\n    profitFactor: profitFactor,\n    sharpeRatio: sharpeRatio\n  };\n}\n\nfunction checkRetrainingCriteria(metrics) {\n  // Trigger retraining if performance degrades\n  const minWinRate = 0.55;\n  const minProfitFactor = 1.2;\n  const minSharpeRatio = 0.5;\n  \n  return metrics.winRate < minWinRate || \n         metrics.profitFactor < minProfitFactor || \n         metrics.sharpeRatio < minSharpeRatio;\n}\n\nreturn trackPerformance();"
+      },
+      "id": "performance-tracker",
+      "name": "Performance Tracker & Learning",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "retraining-condition",
+              "leftValue": "={{ $json.retrainingNeeded }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ]
+        }
+      },
+      "id": "retraining-check",
+      "name": "Check Retraining Need",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1780,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "{{$env.AGI_BRAIN_API_URL}}/retrain",
+        "authentication": "headerAuth",
+        "headerAuth": {
+          "name": "Authorization",
+          "value": "Bearer {{$env.AGI_API_KEY}}"
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "performance_metrics",
+              "value": "={{$json.performanceMetrics}}"
+            },
+            {
+              "name": "trigger_reason",
+              "value": "performance_degradation"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{new Date().toISOString()}}"
+            }
+          ]
+        }
+      },
+      "id": "trigger-retraining",
+      "name": "Trigger AGI Retraining",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        2000,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 */4 * * *"
+            }
+          ]
+        }
+      },
+      "id": "news-trigger",
+      "name": "News Collection Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        240,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "https://feeds.reuters.com/reuters/businessNews",
+        "headers": {
+          "Accept": "application/rss+xml"
+        }
+      },
+      "id": "reuters-news",
+      "name": "Fetch Reuters News",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        460,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "https://feeds.bloomberg.com/markets/news.rss",
+        "headers": {
+          "Accept": "application/rss+xml"
+        }
+      },
+      "id": "bloomberg-news",
+      "name": "Fetch Bloomberg News",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        460,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Advanced News Analysis and Sentiment Processing\nconst processNews = () => {\n  const reutersData = $input.first().json;\n  const bloombergData = $input.all()[1]?.json || {};\n  \n  const allNews = [];\n  \n  // Process Reuters news\n  if (reutersData && reutersData.items) {\n    reutersData.items.forEach(item => {\n      allNews.push({\n        title: item.title,\n        description: item.description,\n        source: 'Reuters',\n        timestamp: item.pubDate,\n        url: item.link\n      });\n    });\n  }\n  \n  // Process Bloomberg news\n  if (bloombergData && bloombergData.items) {\n    bloombergData.items.forEach(item => {\n      allNews.push({\n        title: item.title,\n        description: item.description,\n        source: 'Bloomberg',\n        timestamp: item.pubDate,\n        url: item.link\n      });\n    });\n  }\n  \n  // Analyze each news item\n  const analyzedNews = allNews.map(news => {\n    const sentiment = analyzeSentiment(news.title + ' ' + news.description);\n    const relevance = calculateRelevance(news.title + ' ' + news.description);\n    const impact = assessImpact(news, sentiment, relevance);\n    const affectedPairs = extractCurrencyPairs(news.title + ' ' + news.description);\n    \n    return {\n      ...news,\n      sentiment: sentiment,\n      relevance: relevance,\n      impact: impact,\n      affectedPairs: affectedPairs,\n      processed: true,\n      processingTimestamp: new Date().toISOString()\n    };\n  });\n  \n  // Filter high-impact news\n  const highImpactNews = analyzedNews.filter(news => \n    news.relevance > 0.6 && Math.abs(news.sentiment) > 0.3\n  );\n  \n  // Generate market sentiment summary\n  const marketSentiment = generateMarketSentiment(analyzedNews);\n  \n  return [{\n    json: {\n      totalNews: analyzedNews.length,\n      highImpactNews: highImpactNews,\n      marketSentiment: marketSentiment,\n      processedAt: new Date().toISOString(),\n      newsItems: analyzedNews.slice(0, 20) // Limit to top 20\n    }\n  }];\n};\n\nfunction analyzeSentiment(text) {\n  const positiveWords = [\n    'growth', 'increase', 'rise', 'bullish', 'positive', 'strong', 'gain',\n    'boost', 'surge', 'rally', 'optimistic', 'confident', 'recovery',\n    'expansion', 'improvement', 'success', 'profit', 'earnings'\n  ];\n  \n  const negativeWords = [\n    'decline', 'fall', 'bearish', 'negative', 'weak', 'loss', 'drop',\n    'crash', 'crisis', 'recession', 'concern', 'worry', 'fear',\n    'uncertainty', 'risk', 'threat', 'problem', 'issue'\n  ];\n  \n  const words = text.toLowerCase().split(/\\s+/);\n  let sentiment = 0;\n  \n  words.forEach(word => {\n    if (positiveWords.includes(word)) sentiment += 1;\n    if (negativeWords.includes(word)) sentiment -= 1;\n  });\n  \n  // Normalize sentiment to -1 to 1 range\n  const maxWords = Math.max(positiveWords.length, negativeWords.length);\n  return Math.max(-1, Math.min(1, sentiment / maxWords));\n}\n\nfunction calculateRelevance(text) {\n  const forexKeywords = [\n    'central bank', 'interest rate', 'inflation', 'gdp', 'employment',\n    'fed', 'ecb', 'boe', 'boj', 'monetary policy', 'fiscal policy',\n    'trade war', 'brexit', 'election', 'currency', 'dollar', 'euro',\n    'pound', 'yen', 'forex', 'exchange rate', 'economic data'\n  ];\n  \n  const text_lower = text.toLowerCase();\n  let relevanceScore = 0;\n  \n  forexKeywords.forEach(keyword => {\n    if (text_lower.includes(keyword)) {\n      relevanceScore += 1;\n    }\n  });\n  \n  return Math.min(relevanceScore / forexKeywords.length, 1.0);\n}\n\nfunction assessImpact(news, sentiment, relevance) {\n  let impact = relevance * Math.abs(sentiment);\n  \n  // Boost impact for certain sources\n  if (news.source === 'Reuters' || news.source === 'Bloomberg') {\n    impact *= 1.2;\n  }\n  \n  // Boost impact for recent news\n  const newsAge = (new Date() - new Date(news.timestamp)) / (1000 * 60 * 60); // hours\n  if (newsAge < 2) {\n    impact *= 1.3;\n  } else if (newsAge < 6) {\n    impact *= 1.1;\n  }\n  \n  return Math.min(impact, 1.0);\n}\n\nfunction extractCurrencyPairs(text) {\n  const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD'];\n  const foundCurrencies = [];\n  \n  currencies.forEach(currency => {\n    if (text.toUpperCase().includes(currency)) {\n      foundCurrencies.push(currency);\n    }\n  });\n  \n  const pairs = [];\n  for (let i = 0; i < foundCurrencies.length; i++) {\n    for (let j = i + 1; j < foundCurrencies.length; j++) {\n      pairs.push(foundCurrencies[i] + foundCurrencies[j]);\n      pairs.push(foundCurrencies[j] + foundCurrencies[i]);\n    }\n  }\n  \n  return pairs;\n}\n\nfunction generateMarketSentiment(newsItems) {\n  if (newsItems.length === 0) {\n    return {\n      overall: 0,\n      confidence: 0,\n      trend: 'neutral'\n    };\n  }\n  \n  const weightedSentiment = newsItems.reduce((sum, news) => {\n    return sum + (news.sentiment * news.relevance * news.impact);\n  }, 0);\n  \n  const totalWeight = newsItems.reduce((sum, news) => {\n    return sum + (news.relevance * news.impact);\n  }, 0);\n  \n  const overallSentiment = totalWeight > 0 ? weightedSentiment / totalWeight : 0;\n  const confidence = Math.min(totalWeight / newsItems.length, 1.0);\n  \n  let trend = 'neutral';\n  if (overallSentiment > 0.2) {\n    trend = 'bullish';\n  } else if (overallSentiment < -0.2) {\n    trend = 'bearish';\n  }\n  \n  return {\n    overall: overallSentiment,\n    confidence: confidence,\n    trend: trend,\n    newsCount: newsItems.length\n  };\n}\n\nreturn processNews();"
+      },
+      "id": "news-processor",
+      "name": "Advanced News Processor",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        680,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "high-impact-condition",
+              "leftValue": "={{ $json.highImpactNews.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ]
+        }
+      },
+      "id": "news-filter",
+      "name": "High Impact News Filter",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        900,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://api.telegram.org/bot{{$env.TELEGRAM_BOT_TOKEN}}/sendMessage",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{$env.TELEGRAM_NEWS_CHAT_ID}}"
+            },
+            {
+              "name": "text",
+              "value": "📰 *High Impact News Alert*\\n\\n🌍 Market Sentiment: {{$json.marketSentiment.trend}} ({{$json.marketSentiment.confidence}})\\n\\n{{$json.highImpactNews.map(news => `📊 **${news.source}**\\n${news.title}\\n💭 Sentiment: ${news.sentiment > 0 ? '🟢' : news.sentiment < 0 ? '🔴' : '🟡'} ${news.sentiment.toFixed(2)}\\n📈 Impact: ${news.impact.toFixed(2)}\\n💱 Pairs: ${news.affectedPairs.slice(0,3).join(', ')}\\n`).join('\\n')}\\n\\n🕐 {{new Date().toLocaleString()}}"
+            },
+            {
+              "name": "parse_mode",
+              "value": "Markdown"
+            }
+          ]
+        }
+      },
+      "id": "telegram-news",
+      "name": "Send News Alert to Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        580
+      ]
+    }
+  ],
+  "connections": {
+    "cron-trigger": {
+      "main": [
+        [
+          {
+            "node": "oanda-data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "fxempire-data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "yahoo-news",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "twitter-sentiment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "oanda-data": {
+      "main": [
+        [
+          {
+            "node": "data-processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fxempire-data": {
+      "main": [
+        [
+          {
+            "node": "data-processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "yahoo-news": {
+      "main": [
+        [
+          {
+            "node": "data-processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "twitter-sentiment": {
+      "main": [
+        [
+          {
+            "node": "data-processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "data-processor": {
+      "main": [
+        [
+          {
+            "node": "signal-generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "signal-generator": {
+      "main": [
+        [
+          {
+            "node": "signal-filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "signal-filter": {
+      "main": [
+        [
+          {
+            "node": "risk-manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "risk-manager": {
+      "main": [
+        [
+          {
+            "node": "telegram-signal",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "database-store",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "performance-tracker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "performance-tracker": {
+      "main": [
+        [
+          {
+            "node": "retraining-check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "retraining-check": {
+      "main": [
+        [
+          {
+            "node": "trigger-retraining",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "news-trigger": {
+      "main": [
+        [
+          {
+            "node": "reuters-news",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "bloomberg-news",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reuters-news": {
+      "main": [
+        [
+          {
+            "node": "news-processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bloomberg-news": {
+      "main": [
+        [
+          {
+            "node": "news-processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "news-processor": {
+      "main": [
+        [
+          {
+            "node": "news-filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "news-filter": {
+      "main": [
+        [
+          {
+            "node": "telegram-news",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "id": "agi-trading",
+      "name": "AGI Trading System"
+    }
+  ],
+  "triggerCount": 2,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+}

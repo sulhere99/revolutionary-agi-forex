@@ -1,0 +1,197 @@
+2025-07-05 15:06:47 | [31mERROR[0m | agi_forex            | run_revolutionary:run_revolutionary_system:187 | ❌ Unexpected error: Attribute name 'metadata' is reserved when using the Declarative API.
+2025-07-05 15:24:19 | [31mERROR[0m | utils.config_manager | config_manager:load_config:65 | Error loading configuration: Required configuration section 'database' not found
+2025-07-05 15:24:19 | [31mERROR[0m | agi_forex            | run_revolutionary:run_revolutionary_system:191 | ❌ Unexpected error: Required configuration section 'database' not found
+2025-07-05 15:24:59 | [31mERROR[0m | utils.config_manager | config_manager:load_config:65 | Error loading configuration: Required configuration section 'redis' not found
+2025-07-05 15:24:59 | [31mERROR[0m | agi_forex            | run_revolutionary:run_revolutionary_system:191 | ❌ Unexpected error: Required configuration section 'redis' not found
+2025-07-05 15:25:40 | [31mERROR[0m | utils.config_manager | config_manager:load_config:65 | Error loading configuration: Required configuration section 'telegram' not found
+2025-07-05 15:25:40 | [31mERROR[0m | agi_forex            | run_revolutionary:run_revolutionary_system:191 | ❌ Unexpected error: Required configuration section 'telegram' not found
+2025-07-05 15:26:22 | [31mERROR[0m | utils.config_manager | config_manager:load_config:65 | Error loading configuration: Required configuration section 'api' not found
+2025-07-05 15:26:22 | [31mERROR[0m | agi_forex            | run_revolutionary:run_revolutionary_system:191 | ❌ Unexpected error: Required configuration section 'api' not found
+2025-07-05 15:27:06 | [31mERROR[0m | utils.config_manager | config_manager:load_config:65 | Error loading configuration: Primary database configuration not found
+2025-07-05 15:27:06 | [31mERROR[0m | agi_forex            | run_revolutionary:run_revolutionary_system:191 | ❌ Unexpected error: Primary database configuration not found
+2025-07-05 15:28:01 | [31mERROR[0m | utils.config_manager | config_manager:load_config:65 | Error loading configuration: Required database field 'type' not found
+2025-07-05 15:28:01 | [31mERROR[0m | agi_forex            | run_revolutionary:run_revolutionary_system:191 | ❌ Unexpected error: Required database field 'type' not found
+2025-07-05 15:28:46 | [31mERROR[0m | utils.config_manager | config_manager:load_config:65 | Error loading configuration: Required database field 'type' not found
+2025-07-05 15:28:46 | [31mERROR[0m | agi_forex            | run_revolutionary:run_revolutionary_system:191 | ❌ Unexpected error: Required database field 'type' not found
+2025-07-05 15:29:48 | [31mERROR[0m | utils.config_manager | config_manager:load_config:65 | Error loading configuration: Required database field 'host' not found
+2025-07-05 15:29:48 | [31mERROR[0m | agi_forex            | run_revolutionary:run_revolutionary_system:191 | ❌ Unexpected error: Required database field 'host' not found
+2025-07-05 15:30:28 | [31mERROR[0m | utils.config_manager | config_manager:load_config:65 | Error loading configuration: Required database field 'port' not found
+2025-07-05 15:30:28 | [31mERROR[0m | agi_forex            | run_revolutionary:run_revolutionary_system:191 | ❌ Unexpected error: Required database field 'port' not found
+2025-07-05 15:31:35 | [31mERROR[0m | agi_forex            | run_revolutionary:run_revolutionary_system:191 | ❌ Unexpected error: Attribute name 'metadata' is reserved when using the Declarative API.
+2025-07-05 15:32:54 | [31mERROR[0m | agi_forex            | run_revolutionary:run_revolutionary_system:191 | ❌ Unexpected error: Your currently installed version of Keras is Keras 3, but this is not yet supported in Transformers. Please install the backwards-compatible tf-keras package with `pip install tf-keras`.
+2025-07-05 15:33:59 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:741 | ❌ Error starting revolutionary system: 'DatabaseManager' object has no attribute 'initialize'
+2025-07-05 15:35:26 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:741 | ❌ Error starting revolutionary system: 'market_data'
+2025-07-05 15:36:53 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:741 | ❌ Error starting revolutionary system: 'market_data'
+2025-07-05 15:38:27 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:743 | ❌ Error starting revolutionary system: 'market_data'
+2025-07-05 15:38:27 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:744 | Traceback: Traceback (most recent call last):
+  File "/workspace/revolutionary-agi-forex/main.py", line 730, in start_revolutionary_system
+    await self._initialize_original_components()
+  File "/workspace/revolutionary-agi-forex/main.py", line 754, in _initialize_original_components
+    self.data_collector = MarketDataCollector(self.config['market_data'])
+                                              ~~~~~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 'market_data'
+
+2025-07-05 15:39:39 | [31mERROR[0m | data.market_data_collector | market_data_collector:_setup_twitter_api:320 | Error setting up Twitter API: Consumer key must be string or bytes, not NoneType
+2025-07-05 15:39:39 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:743 | ❌ Error starting revolutionary system: 'MarketDataCollector' object has no attribute 'start'
+2025-07-05 15:39:39 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:744 | Traceback: Traceback (most recent call last):
+  File "/workspace/revolutionary-agi-forex/main.py", line 730, in start_revolutionary_system
+    await self._initialize_original_components()
+  File "/workspace/revolutionary-agi-forex/main.py", line 767, in _initialize_original_components
+    await self.data_collector.start()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MarketDataCollector' object has no attribute 'start'
+
+2025-07-05 15:40:46 | [31mERROR[0m | data.market_data_collector | market_data_collector:_setup_twitter_api:320 | Error setting up Twitter API: Consumer key must be string or bytes, not NoneType
+2025-07-05 15:40:46 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:743 | ❌ Error starting revolutionary system: 'agi'
+2025-07-05 15:40:46 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:744 | Traceback: Traceback (most recent call last):
+  File "/workspace/revolutionary-agi-forex/main.py", line 730, in start_revolutionary_system
+    await self._initialize_original_components()
+  File "/workspace/revolutionary-agi-forex/main.py", line 770, in _initialize_original_components
+    self.agi_brain = AGIBrain(self.config['agi'])
+                              ~~~~~~~~~~~^^^^^^^
+KeyError: 'agi'
+
+2025-07-05 15:41:45 | [31mERROR[0m | data.market_data_collector | market_data_collector:_setup_twitter_api:320 | Error setting up Twitter API: Consumer key must be string or bytes, not NoneType
+2025-07-05 15:41:45 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:743 | ❌ Error starting revolutionary system: Missing shimmy installation. You provided an OpenAI Gym environment. Stable-Baselines3 (SB3) has transitioned to using Gymnasium internally. In order to use OpenAI Gym environments with SB3, you need to install shimmy (`pip install 'shimmy>=2.0'`).
+2025-07-05 15:41:45 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:744 | Traceback: Traceback (most recent call last):
+  File "/openhands/poetry/openhands-ai-5O4_aCHf-py3.12/lib/python3.12/site-packages/stable_baselines3/common/vec_env/patch_gym.py", line 40, in _patch_env
+    import shimmy
+ModuleNotFoundError: No module named 'shimmy'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/revolutionary-agi-forex/main.py", line 730, in start_revolutionary_system
+    await self._initialize_original_components()
+  File "/workspace/revolutionary-agi-forex/main.py", line 785, in _initialize_original_components
+    self.agi_brain = AGIBrain(agi_config)
+                     ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/revolutionary-agi-forex/core/agi_brain.py", line 245, in __init__
+    self.rl_agent = ReinforcementLearningAgent(state_size=100, action_size=3)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/revolutionary-agi-forex/core/agi_brain.py", line 119, in __init__
+    self.model = PPO("MlpPolicy", self.env, verbose=1)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/openhands/poetry/openhands-ai-5O4_aCHf-py3.12/lib/python3.12/site-packages/stable_baselines3/ppo/ppo.py", line 109, in __init__
+    super().__init__(
+  File "/openhands/poetry/openhands-ai-5O4_aCHf-py3.12/lib/python3.12/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 86, in __init__
+    super().__init__(
+  File "/openhands/poetry/openhands-ai-5O4_aCHf-py3.12/lib/python3.12/site-packages/stable_baselines3/common/base_class.py", line 170, in __init__
+    env = self._wrap_env(env, self.verbose, monitor_wrapper)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/openhands/poetry/openhands-ai-5O4_aCHf-py3.12/lib/python3.12/site-packages/stable_baselines3/common/base_class.py", line 217, in _wrap_env
+    env = _patch_env(env)
+          ^^^^^^^^^^^^^^^
+  File "/openhands/poetry/openhands-ai-5O4_aCHf-py3.12/lib/python3.12/site-packages/stable_baselines3/common/vec_env/patch_gym.py", line 42, in _patch_env
+    raise ImportError(
+ImportError: Missing shimmy installation. You provided an OpenAI Gym environment. Stable-Baselines3 (SB3) has transitioned to using Gymnasium internally. In order to use OpenAI Gym environments with SB3, you need to install shimmy (`pip install 'shimmy>=2.0'`).
+
+2025-07-05 15:42:41 | [31mERROR[0m | data.market_data_collector | market_data_collector:_setup_twitter_api:320 | Error setting up Twitter API: Consumer key must be string or bytes, not NoneType
+2025-07-05 15:42:44 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:743 | ❌ Error starting revolutionary system: 'AGIBrain' object has no attribute 'start'
+2025-07-05 15:42:44 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:744 | Traceback: Traceback (most recent call last):
+  File "/workspace/revolutionary-agi-forex/main.py", line 730, in start_revolutionary_system
+    await self._initialize_original_components()
+  File "/workspace/revolutionary-agi-forex/main.py", line 786, in _initialize_original_components
+    await self.agi_brain.start()
+          ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AGIBrain' object has no attribute 'start'
+
+2025-07-05 15:43:40 | [31mERROR[0m | data.market_data_collector | market_data_collector:_setup_twitter_api:320 | Error setting up Twitter API: Consumer key must be string or bytes, not NoneType
+2025-07-05 15:43:41 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:743 | ❌ Error starting revolutionary system: 'performance'
+2025-07-05 15:43:41 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:744 | Traceback: Traceback (most recent call last):
+  File "/workspace/revolutionary-agi-forex/main.py", line 730, in start_revolutionary_system
+    await self._initialize_original_components()
+  File "/workspace/revolutionary-agi-forex/main.py", line 792, in _initialize_original_components
+    self.performance_monitor = PerformanceMonitor(self.config['performance'])
+                                                  ~~~~~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 'performance'
+
+2025-07-05 15:44:46 | [31mERROR[0m | data.market_data_collector | market_data_collector:_setup_twitter_api:320 | Error setting up Twitter API: Consumer key must be string or bytes, not NoneType
+2025-07-05 15:44:47 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:743 | ❌ Error starting revolutionary system: 'telegram_bot_token'
+2025-07-05 15:44:47 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:744 | Traceback: Traceback (most recent call last):
+  File "/workspace/revolutionary-agi-forex/main.py", line 730, in start_revolutionary_system
+    await self._initialize_original_components()
+  File "/workspace/revolutionary-agi-forex/main.py", line 811, in _initialize_original_components
+    self.telegram_bot = AdvancedTelegramBot(self.config['telegram'])
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/revolutionary-agi-forex/telegram_bot/advanced_bot.py", line 145, in __init__
+    self.bot_token = config['telegram_bot_token']
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'telegram_bot_token'
+
+2025-07-05 15:45:58 | [31mERROR[0m | data.market_data_collector | market_data_collector:_setup_twitter_api:320 | Error setting up Twitter API: Consumer key must be string or bytes, not NoneType
+2025-07-05 15:45:58 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:743 | ❌ Error starting revolutionary system: 'RevolutionaryAGIForexSystem' object has no attribute 'logger'
+2025-07-05 15:45:58 | [31mERROR[0m | agi_forex            | main:start_revolutionary_system:744 | Traceback: Traceback (most recent call last):
+  File "/workspace/revolutionary-agi-forex/main.py", line 730, in start_revolutionary_system
+    await self._initialize_original_components()
+  File "/workspace/revolutionary-agi-forex/main.py", line 834, in _initialize_original_components
+    self.logger.warning("No valid Telegram bot token found. Telegram bot will not be started.")
+    ^^^^^^^^^^^
+AttributeError: 'RevolutionaryAGIForexSystem' object has no attribute 'logger'
+
+2025-07-05 15:46:54 | [31mERROR[0m | data.market_data_collector | market_data_collector:_setup_twitter_api:320 | Error setting up Twitter API: Consumer key must be string or bytes, not NoneType
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:46:56 | [31mERROR[0m | yfinance             | history:history:265 | $DXY: possibly delisted; no price data found  (period=5d)
+2025-07-05 15:46:58 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_periodic_analysis:1459 | Error in periodic analysis: 'baseline_activity'
+2025-07-05 15:49:36 | [31mERROR[0m | asyncio              | base_events:default_exception_handler:1833 | Task exception was never retrieved
+future: <Task finished name='Task-5' coro=<to_thread() done, defined at /openhands/micromamba/envs/openhands/lib/python3.12/asyncio/threads.py:12> exception=TypeError("run() got an unexpected keyword argument 'debug'")>
+Traceback (most recent call last):
+  File "/openhands/micromamba/envs/openhands/lib/python3.12/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/openhands/micromamba/envs/openhands/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/revolutionary-agi-forex/main.py", line 1213, in run_revolutionary_api_server
+    uvicorn.run(
+TypeError: run() got an unexpected keyword argument 'debug'
+2025-07-05 15:50:54 | [31mERROR[0m | data.market_data_collector | market_data_collector:_setup_twitter_api:320 | Error setting up Twitter API: Consumer key must be string or bytes, not NoneType
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:54 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_store_reading_to_db:370 | Error storing sensor reading: Textual SQL expression '\n                INSERT I...' should be explicitly declared as text('\n                INSERT I...')
+2025-07-05 15:50:56 | [31mERROR[0m | yfinance             | history:history:265 | $DXY: possibly delisted; no price data found  (period=5d)
+2025-07-05 15:50:57 | [31mERROR[0m | core.neuro_economic_engine | neuro_economic_engine:_periodic_analysis:1459 | Error in periodic analysis: 'baseline_activity'
+2025-07-05 15:52:59 | [31mERROR[0m | asyncio              | base_events:default_exception_handler:1833 | Task exception was never retrieved
+future: <Task finished name='Task-5' coro=<to_thread() done, defined at /openhands/micromamba/envs/openhands/lib/python3.12/asyncio/threads.py:12> exception=TypeError("run() got an unexpected keyword argument 'debug'")>
+Traceback (most recent call last):
+  File "/openhands/micromamba/envs/openhands/lib/python3.12/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/openhands/micromamba/envs/openhands/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/revolutionary-agi-forex/main.py", line 1213, in run_revolutionary_api_server
+    uvicorn.run(
+TypeError: run() got an unexpected keyword argument 'debug'
